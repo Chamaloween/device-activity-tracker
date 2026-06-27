@@ -204,10 +204,10 @@ export function Dashboard({ connectionState, language, theme }: DashboardProps) 
             setProbeMethod(method);
         }
 
-        function onTrackedContacts(contacts: { id: string, platform: Platform, paused?: boolean }[]) {
+        function onTrackedContacts(contactsList: { id: string, platform: Platform, paused?: boolean }[]) {
             setContacts(prev => {
                 const next = new Map(prev);
-                contacts.forEach(({ id, platform, paused }) => {
+                contactsList.forEach(({ id, platform, paused }) => {
                     if (!next.has(id)) {
                         // Extract display number from id
                         let displayNumber = id;
@@ -233,14 +233,14 @@ export function Dashboard({ connectionState, language, theme }: DashboardProps) 
                     } else if (paused !== undefined) {
                         const contact = next.get(id);
                         if (contact) {
-                            next.set(id, { ...entry, paused }); // Support pause state mapping properly
+                            next.set(id, { ...contact, paused }); // Corrected 'entry' to 'contact'
                         }
                     }
                 });
-                socket.emit('tracked-contacts', trackedContacts);
+                return next; // Saves the updated contacts map to React state!
             });
-        };
-
+        } // Closed cleanly with '}' so your useEffect stays perfectly open!
+        
         socket.on('tracker-update', onTrackerUpdate);
         socket.on('profile-pic', onProfilePic);
         socket.on('contact-name', onContactName);
