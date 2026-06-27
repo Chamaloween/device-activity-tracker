@@ -261,7 +261,7 @@ export function ContactCard({
                         </div>
 
                         {/* Chart */}
-                        <div className={`p-6 rounded-xl shadow-sm border h-[300px] ${theme === 'dark'
+<div className={`p-6 rounded-xl shadow-sm border h-[300px] ${theme === 'dark'
                                 ? 'bg-gray-700 border-gray-600'
                                 : 'bg-white border-gray-200'
                             }`}>
@@ -281,7 +281,7 @@ export function ContactCard({
                                         tick={{ fill: theme === 'dark' ? '#9ca3af' : '#000', fontSize: 12 }}
                                     />
                                     <Tooltip
-labelFormatter={(label) => {
+                                      labelFormatter={(label) => {
                                         const t = typeof label === "number" ? label : Number(label);
                                         if (!Number.isFinite(t)) return String(label ?? "");
                                         return new Date(t).toLocaleTimeString();
