@@ -239,7 +239,7 @@ export function Dashboard({ connectionState, language, theme }: DashboardProps) 
                 });
                 socket.emit('tracked-contacts', trackedContacts);
             });
-        });
+        };
 
         socket.on('tracker-update', onTrackerUpdate);
         socket.on('profile-pic', onProfilePic);
