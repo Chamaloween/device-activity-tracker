@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Eye, EyeOff, Plus, Trash2, Zap, MessageCircle, Settings} from 'lucide-react';
+import { Eye, EyeOff, Plus, Trash2, Zap, MessageCircle, Settings } from 'lucide-react';
 import { socket, Platform, ConnectionState } from '../App';
 import { ContactCard } from './ContactCard';
 import { Login } from './Login';
@@ -15,6 +15,10 @@ interface TrackerData {
     avg: number;
     median: number;
     threshold: number;
+    // New metrics
+    onlineAvg: number;
+    standbyAvg: number;
+    confidence: number;
     state: string;
     timestamp: number;
 }
@@ -24,6 +28,10 @@ interface DeviceInfo {
     state: string;
     rtt: number;
     avg: number;
+    onlineAvg: number;
+    standbyAvg: number;
+    threshold: number;
+    confidence: number;
 }
 
 interface ContactInfo {
@@ -74,19 +82,28 @@ export function Dashboard({ connectionState }: DashboardProps) {
                     }
 
                     // Add to chart data
-                    if (data.median !== undefined && data.devices && data.devices.length > 0) {
+                    if (data.devices && data.devices.length > 0) {
+                        const device = data.devices[0];
                         const newDataPoint: TrackerData = {
-                            rtt: data.devices[0].rtt,
-                            avg: data.devices[0].avg,
-                            median: data.median,
-                            threshold: data.threshold,
+rtt: device.rtt,
+                            avg: device.avg || 0,
+                            median: data.median || 0,
+                            threshold: device.threshold,
+                            onlineAvg: device.onlineAvg,
+                            standbyAvg: device.standbyAvg,
+                            confidence: device.confidence,
                             state: data.devices.find((d: DeviceInfo) => d.state.includes('Online'))?.state ||
                                 data.devices.find((d: DeviceInfo) => d.state.includes('Standby'))?.state ||
                                 data.devices.find((d: DeviceInfo) => d.state === 'OFFLINE')?.state ||
-                                data.devices[0].state,
+                                device.state,
                             timestamp: Date.now(),
                         };
                         updatedContact.data = [...updatedContact.data, newDataPoint];
+
+                        // Limit history to 100 points
+                        if (updatedContact.data.length > 100) {
+                            updatedContact.data.shift();
+                        }
                     }
 
                     next.set(jid, updatedContact);
@@ -258,48 +275,31 @@ export function Dashboard({ connectionState }: DashboardProps) {
                         <h2 className="text-2xl font-semibold text-slate-900">Track Contacts</h2>
                         {/* Manage Connections button */}
                         <button
-                            onClick={() => setShowConnections(!showConnections)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors flex items-center gap-1 ${
-                                showConnections
-                                    ? 'bg-[#0f766e] text-white shadow-sm'
-                                    : 'bg-white/70 text-slate-600 hover:bg-white'
-                            }`}
-                        >
-                            <Settings size={14} />
-                            {showConnections ? 'Hide Connections' : 'Manage Connections'}
-                        </button>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        {/* Probe Method Toggle */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-slate-600">Probe Method:</span>
-                            <div className="flex rounded-full overflow-hidden border border-[#e6dfd3] bg-white/70">
-                                <button
-                                    onClick={() => handleProbeMethodChange('delete')}
-                                    className={`px-3 py-1.5 text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
-                                        probeMethod === 'delete'
-                                            ? 'bg-[#0f766e] text-white shadow-sm'
-                                            : 'text-slate-600 hover:bg-white'
-                                    }`}
-                                    title="Silent Delete Probe - Completely covert, target sees nothing"
-                                >
-                                    <Trash2 size={14} />
-                                    Delete
-                                </button>
-                                <button
-                                    onClick={() => handleProbeMethodChange('reaction')}
-                                    className={`px-3 py-1.5 text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
-                                        probeMethod === 'reaction'
-                                            ? 'bg-[#e07a4f] text-white shadow-sm'
-                                            : 'text-slate-600 hover:bg-white'
-                                    }`}
-                                    title="Reaction Probe - Sends reactions to non-existent messages"
-                                >
-                                    <Zap size={14} />
-                                    Reaction
-                                </button>
-                            </div>
+                                onClick={() => handleProbeMethodChange('delete')}
+                                className={`px-3 py-1.5 text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
+                                    probeMethod === 'delete'
+                                        ? 'bg-[#0f766e] text-white shadow-sm'
+                                        : 'text-slate-600 hover:bg-white'
+                                }`}
+                                title="Silent Delete Probe - Completely covert, target sees nothing"
+                            >
+                                <Trash2 size={14} />
+                                Delete
+                            </button>
+                            <button
+                                onClick={() => handleProbeMethodChange('reaction')}
+                                className={`px-3 py-1.5 text-sm font-medium transition-all duration-200 flex items-center gap-1 ${
+                                    probeMethod === 'reaction'
+                                        ? 'bg-[#e07a4f] text-white shadow-sm'
+                                        : 'text-slate-600 hover:bg-white'
+                                }`}
+                                title="Reaction Probe - Sends reactions to non-existent messages"
+                            >
+                                <Zap size={14} />
+                                Reaction
+                            </button>
                         </div>
+                    </div>
                         {/* Privacy Mode Toggle */}
                         <button
                             onClick={() => setPrivacyMode(!privacyMode)}
