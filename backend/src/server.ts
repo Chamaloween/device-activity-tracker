@@ -79,25 +79,26 @@ function scheduleWhatsAppReconnect() {
 }
 
 async function connectToWhatsApp() {
-    if (isWhatsAppConnecting) return;
+if (isWhatsAppConnecting) return;
     isWhatsAppConnecting = true;
 
     try {
         const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
-        const { version } = await fetchLatestBaileysVersion();
+        const { version, isLatest } = await fetchLatestBaileysVersion();
+        console.log(`Using WA v${version.join('.')}, isLatest: ${isLatest}`);
 
         sock = makeWASocket({
+            version,
             auth: state,
-            logger: pino({ level: 'warn' }),
+            logger: pino({ level: 'warn' }), // Keeps your quieter pino setting to avoid console spam
             markOnlineOnConnect: true,
             printQRInTerminal: false,
-            version,
+            browser: ['Windows', 'Chrome', '120.0.0'],
         });
 
         sock.ev.on('connection.update', async (update: any) => {
             const { connection, lastDisconnect, qr } = update;
-
-            if (qr) {
+if (qr) {
                 console.log('QR Code generated');
                 currentWhatsAppQr = qr; // Store the QR code
                 io.emit('qr', qr);
