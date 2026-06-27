@@ -14,8 +14,5 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
-  },
-  "dependencies": {
-    "device-activity-tracker-monorepo": "file:.."
   }
 }

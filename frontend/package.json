@@ -12,6 +12,7 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "clsx": "^2.1.1",
+    "device-activity-tracker-monorepo": "file:..",
     "lucide-react": "^0.556.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.1",
