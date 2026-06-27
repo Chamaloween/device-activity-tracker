@@ -5,7 +5,7 @@ Thanks for your interest in this PoC!
 ## How to contribute
 1. Fork and clone the repo
 2. Create a branch: `git checkout -b feature/my-change`
-3. Install deps: `npm install` (and `cd client && npm install && cd ..`)
+3. Install deps: `npm install` (and `cd frontend && npm install && cd ..`)
 4. Make your changes
 5. Open a pull request with a short description and motivation
 

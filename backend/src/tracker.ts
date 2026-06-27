@@ -96,7 +96,7 @@ interface DeviceMetrics {
  * by Gegenhuber et al., University of Vienna & SBA Research
  */
 export class WhatsAppTracker {
-private sock: WASocket;
+    private sock: WASocket;
     private targetJid: string;
     private trackedJids: Set<string> = new Set(); // Multi-device support
     private isTracking: boolean = false;
@@ -205,7 +205,7 @@ private sock: WASocket;
 
     private async probeLoop() {
         while (this.isTracking) {
-if (this.isPaused) {
+            if (this.isPaused) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 continue;
             }
@@ -238,7 +238,7 @@ if (this.isPaused) {
         try {
             // Generate a random message ID that likely doesn't exist
             const prefixes = ['3EB0', 'BAE5', 'F1D2', 'A9C4', '7E8B', 'C3F9', '2D6A'];
-            const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const randomPrefix = prefixes[Math.floor(Math.random()].toUpperCase();
             const randomSuffix = Math.random().toString(36).substring(2, 10).toUpperCase();
             const randomMsgId = randomPrefix + randomSuffix;
 
@@ -265,18 +265,18 @@ if (this.isPaused) {
                 // Timeout = max delay * 10 (adaptive to probe interval)
                 const timeoutMs = this.probeMaxDelay * 10;
                 const timeoutId = setTimeout(() => {
-                     if (this.probeStartTimes.has(result.key.id!)) {
-                         const elapsedTime = Date.now() - startTime;
-                         trackerLogger.debug(`[PROBE-DELETE TIMEOUT] No CLIENT ACK for ${result.key.id} after ${elapsedTime}ms - Device is OFFLINE`);
-                         this.probeStartTimes.delete(result.key.id!);
-                         this.probeTimeouts.delete(result.key.id!);
+                    if (this.probeStartTimes.has(result.key.id!)) {
+                        const elapsedTime = Date.now() - startTime;
+                        trackerLogger.debug(`[PROBE-DELETE TIMEOUT] No CLIENT ACK for ${result.key.id} after ${elapsedTime}ms - Device is OFFLINE`);
+                        this.probeStartTimes.delete(result.key.id!);
+                        this.probeTimeouts.delete(result.key.id!);
 
                         // Mark device as OFFLINE due to no response
                         if (result.key.remoteJid) {
                             this.markDeviceOffline(result.key.remoteJid, elapsedTime);
                         }
-                        }
-                        }, timeoutMs);
+                    }
+                }, timeoutMs);
 
                 this.probeTimeouts.set(result.key.id, timeoutId);
             } else {
@@ -319,25 +319,25 @@ if (this.isPaused) {
             const startTime = Date.now();
 
             if (result?.key?.id) {
-                 trackerLogger.debug(`[PROBE-REACTION] Probe sent successfully, message ID: ${result.key.id}`);
-                 this.probeStartTimes.set(result.key.id, startTime);
+                trackerLogger.debug(`[PROBE-REACTION] Probe sent successfully, message ID: ${result.key.id}`);
+                this.probeStartTimes.set(result.key.id, startTime);
 
-                 // Set timeout: if no CLIENT ACK within timeout period, mark device as OFFLINE
-                 // Timeout = max delay * 10 (adaptive to probe interval)
-                 const timeoutMs = this.probeMaxDelay * 10;
-                 const timeoutId = setTimeout(() => {
-                     if (this.probeStartTimes.has(result.key.id!)) {
-                         const elapsedTime = Date.now() - startTime;
-                         trackerLogger.debug(`[PROBE-REACTION TIMEOUT] No CLIENT ACK for ${result.key.id} after ${elapsedTime}ms - Device is OFFLINE`);
-                         this.probeStartTimes.delete(result.key.id!);
-                         this.probeTimeouts.delete(result.key.id!);
+                // Set timeout: if no CLIENT ACK within timeout period, mark device as OFFLINE
+                // Timeout = max delay * 10 (adaptive to probe interval)
+                const timeoutMs = this.probeMaxDelay * 10;
+                const timeoutId = setTimeout(() => {
+                    if (this.probeStartTimes.has(result.key.id!)) {
+                        const elapsedTime = Date.now() - startTime;
+                        trackerLogger.debug(`[PROBE-REACTION TIMEOUT] No CLIENT ACK for ${result.key.id} after ${elapsedTime}ms - Device is OFFLINE`);
+                        this.probeStartTimes.delete(result.key.id!);
+                        this.probeTimeouts.delete(result.key.id!);
 
-                         // Mark device as OFFLINE due to no response
-                         if (result.key.remoteJid) {
-                             this.markDeviceOffline(result.key.remoteJid, elapsedTime);
-                         }
-                     }
-                 }, timeoutMs);
+                        // Mark device as OFFLINE due to no response
+                        if (result.key.remoteJid) {
+                            this.markDeviceOffline(result.key.remoteJid, elapsedTime);
+                        }
+                    }
+                }, timeoutMs);
 
                 this.probeTimeouts.set(result.key.id, timeoutId);
             } else {
@@ -492,7 +492,6 @@ if (this.isPaused) {
         const metrics = this.deviceMetrics.get(jid)!;
 
         // Only add measurements if we actually received a CLIENT ACK (rtt <= 5000ms)
-        // Note: The adaptive manager handles outlier filtering, but we pass raw values
         if (rtt <= 10000) {
             metrics.lastRtt = rtt;
             metrics.lastUpdate = Date.now();
@@ -535,8 +534,7 @@ if (this.isPaused) {
             devices,
             deviceCount: this.trackedJids.size,
             presence: this.lastPresence,
-            // Keep specific legacy fields for compatibility if needed, 
-            // but effectively the per-device stats are what matter now.
+            // Keep specific legacy fields for compatibility if needed
             median: 0,
             threshold: 0
         };

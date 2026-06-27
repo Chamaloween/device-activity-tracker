@@ -144,7 +144,7 @@ function App() {
     };
 
     return (
-<div className={`min-h-screen app-shell transition-colors duration-300 ${
+        <div className={`min-h-screen app-shell transition-colors duration-300 ${
             theme === 'dark' 
                 ? 'bg-slate-950 text-slate-100 dark' 
                 : 'bg-slate-50 text-slate-900'

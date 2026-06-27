@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ComposedChart, ReferenceArea } from 'recharts';
 import { Activity, Wifi, Smartphone, Monitor, MessageCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Pause, Play, Trash2, Square, BarChart2, ShieldCheck, Zap } from 'lucide-react';
 import clsx from 'clsx';
+import { Language, getTranslation } from '../i18n';
 
 type Platform = 'whatsapp' | 'signal';
 
@@ -62,9 +63,11 @@ interface ContactCardProps {
     paused: boolean;
     onPause: () => void;
     onResume: () => void;
-    onDelete: () => void;
+    onRemove: () => void; // Standardized to match Dashboard's onRemove handler
     privacyMode?: boolean;
     platform?: Platform;
+    language: Language;
+    theme: 'light' | 'dark';
 }
 
 export function ContactCard({
@@ -78,9 +81,11 @@ export function ContactCard({
     paused,
     onPause,
     onResume,
-    onDelete,
+    onRemove,
     privacyMode = false,
-    platform = 'whatsapp'
+    platform = 'whatsapp',
+    language,
+    theme
 }: ContactCardProps) {
     const lastData = data[data.length - 1];
     const [historyRangeMs, setHistoryRangeMs] = useState<number | null>(15 * 60 * 1000);
@@ -234,18 +239,24 @@ export function ContactCard({
     const confidenceColor = confidencePct > 80 ? 'text-green-600' : confidencePct > 50 ? 'text-yellow-600' : 'text-red-500';
 
     return (
-        <div className="relative rounded-3xl border border-white/60 bg-white/80 shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)] overflow-hidden">
+        <div className={`relative rounded-3xl border overflow-hidden shadow-[0_20px_60px_-40px_rgba(15,23,42,0.45)] transition-colors duration-300 ${
+            theme === 'dark' ? 'bg-slate-900/95 border-slate-800' : 'bg-white/80 border-white/60'
+        }`}>
             {/* Header with Stop Button */}
-            <div className="px-6 py-4 flex items-center justify-between border-b border-white/60 bg-white/70 backdrop-blur">
+            <div className={`px-6 py-4 flex items-center justify-between border-b backdrop-blur transition-colors duration-300 ${
+                theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/70 border-white/60'
+            }`}>
                 <div className="flex items-center gap-3">
                     <span className={clsx(
                         "px-2 py-1 rounded text-xs font-medium flex items-center gap-1",
-                        platform === 'whatsapp' ? "bg-[#dcf8eb] text-[#1f7a4f]" : "bg-[#e0ebff] text-[#2b5bb7]"
+                        platform === 'whatsapp' 
+                            ? theme === 'dark' ? "bg-[#1f7a4f]/20 text-[#22c55e]" : "bg-[#dcf8eb] text-[#1f7a4f]"
+                            : theme === 'dark' ? "bg-blue-950/40 text-blue-400" : "bg-[#e0ebff] text-[#2b5bb7]"
                     )}>
                         <MessageCircle size={12} />
                         {platform === 'whatsapp' ? 'WhatsApp' : 'Signal'}
                     </span>
-                    <h3 className="text-lg font-semibold text-slate-900">{blurredNumber}</h3>
+                    <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{blurredNumber}</h3>
                 </div>
                 <div className="flex items-center gap-2">
                     {paused ? (
@@ -253,21 +264,21 @@ export function ContactCard({
                             onClick={onResume}
                             className="px-4 py-2 bg-emerald-500 text-white rounded-full hover:bg-emerald-600 flex items-center gap-2 font-medium transition-colors text-sm shadow-sm"
                         >
-                            <Play size={16} /> Start
+                            <Play size={16} /> {getTranslation(language, 'start')}
                         </button>
                     ) : (
                         <button
                             onClick={onPause}
                             className="px-4 py-2 bg-amber-500 text-white rounded-full hover:bg-amber-600 flex items-center gap-2 font-medium transition-colors text-sm shadow-sm"
                         >
-                            <Pause size={16} /> Stop
+                            <Pause size={16} /> {getTranslation(language, 'stop')}
                         </button>
                     )}
                     <button
-                        onClick={onDelete}
+                        onClick={onRemove}
                         className="px-4 py-2 bg-rose-500 text-white rounded-full hover:bg-rose-600 flex items-center gap-2 font-medium transition-colors text-sm shadow-sm"
                     >
-                        <Trash2 size={16} /> Delete
+                        <Trash2 size={16} /> {getTranslation(language, 'remove')}
                     </button>
                 </div>
             </div>
@@ -275,9 +286,13 @@ export function ContactCard({
             <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Status Card */}
-                    <div className="bg-white/90 p-6 rounded-2xl shadow-sm border border-white/60 flex flex-col items-center text-center">
+                    <div className={`p-6 rounded-2xl shadow-sm border flex flex-col items-center text-center transition-colors duration-300 ${
+                        theme === 'dark' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/90 border-white/60'
+                    }`}>
                         <div className="relative mb-4">
-                            <div className="w-32 h-32 rounded-full overflow-hidden bg-[#f3ede4] border-4 border-white shadow-md">
+                            <div className={`w-32 h-32 rounded-full overflow-hidden border-4 shadow-md ${
+                                theme === 'dark' ? 'bg-slate-800 border-slate-700' : 'bg-[#f3ede4] border-white'
+                            }`}>
                                 {profilePic ? (
                                     <img
                                         src={profilePic}
@@ -291,13 +306,16 @@ export function ContactCard({
                                         } : {}}
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-400">
-                                        No Image
+                                    <div className={`w-full h-full flex items-center justify-center ${
+                                        theme === 'dark' ? 'text-slate-500' : 'text-slate-400'
+                                    }`}>
+                                        {getTranslation(language, 'profilePic')}
                                     </div>
                                 )}
                             </div>
                             <div className={clsx(
-                                "absolute bottom-2 right-2 w-6 h-6 rounded-full border-2 border-white",
+                                "absolute bottom-2 right-2 w-6 h-6 rounded-full border-2",
+                                theme === 'dark' ? 'border-slate-800' : 'border-white',
                                 displayStatus === 'Paused' ? "bg-slate-400" :
                                     displayStatus === 'OFFLINE' ? "bg-rose-500" :
                                         displayStatus.includes('Online') ? "bg-emerald-500" :
@@ -305,31 +323,43 @@ export function ContactCard({
                             )} />
                         </div>
 
-                        <h4 className="text-xl font-bold text-slate-900 mb-1">{blurredNumber}</h4>
+                        <h4 className={`text-xl font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>{blurredNumber}</h4>
 
                         <div className="flex items-center gap-2 mb-4">
                             <span className={clsx(
                                 "px-3 py-1 rounded-full text-sm font-medium",
                                 displayStatus === 'Paused' ? "bg-slate-100 text-slate-600" :
-                                    displayStatus === 'OFFLINE' ? "bg-rose-100 text-rose-700" :
-                                        displayStatus.includes('Online') ? "bg-emerald-100 text-emerald-700" :
-                                            displayStatus === 'Standby' ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"
+                                    displayStatus === 'OFFLINE'
+                                        ? theme === 'dark' ? "bg-rose-950/40 text-rose-400" : "bg-rose-100 text-rose-700"
+                                        : displayStatus.includes('Online')
+                                            ? theme === 'dark' ? "bg-emerald-950/40 text-emerald-400" : "bg-emerald-100 text-emerald-700"
+                                            : displayStatus === 'Standby'
+                                                ? theme === 'dark' ? "bg-amber-950/40 text-amber-400" : "bg-amber-100 text-amber-700"
+                                                : "bg-slate-100 text-slate-600"
                             )}>
                                 {displayStatus}
                             </span>
                         </div>
 
-                        <div className="w-full pt-4 border-t border-white/60 space-y-2">
-                            <div className="flex justify-between items-center text-sm text-slate-600">
-                                <span className="flex items-center gap-1"><Wifi size={16} /> Official Status</span>
-                                <span className="font-medium">{presence || 'Unknown'}</span>
+                        <div className={`w-full pt-4 border-t space-y-2 ${theme === 'dark' ? 'border-slate-800' : 'border-white/60'}`}>
+                            <div className={`flex justify-between items-center text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                                <span className="flex items-center gap-1"><Wifi size={16} /> {getTranslation(language, 'officialStatus')}</span>
+                                <span className="font-medium">
+                                    {presence
+                                        ? presence === 'available'
+                                            ? getTranslation(language, 'available')
+                                            : presence === 'unavailable'
+                                                ? getTranslation(language, 'unavailable')
+                                                : presence
+                                        : getTranslation(language, 'unknown')}
+                                </span>
                             </div>
-                            <div className="flex justify-between items-center text-sm text-slate-600">
-                                <span className="flex items-center gap-1"><Smartphone size={16} /> Devices</span>
+                            <div className={`flex justify-between items-center text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                                <span className="flex items-center gap-1"><Smartphone size={16} /> {getTranslation(language, 'devices')}</span>
                                 <span className="font-medium">{deviceCount || 0}</span>
                             </div>
                             {lastData?.confidence !== undefined && (
-                                <div className="flex justify-between items-center text-sm text-gray-600">
+                                <div className={`flex justify-between items-center text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
                                     <span className="flex items-center gap-1"><ShieldCheck size={16} /> Confidence</span>
                                     <span className={clsx("font-bold", confidenceColor)}>{confidencePct}%</span>
                                 </div>
@@ -338,20 +368,28 @@ export function ContactCard({
 
                         {/* Device List */}
                         {devices.length > 0 && (
-                            <div className="w-full pt-4 border-t border-white/60 mt-4">
-                                <h5 className="text-xs font-semibold text-slate-500 uppercase mb-2">Device States</h5>
+                            <div className={`w-full pt-4 border-t mt-4 ${theme === 'dark' ? 'border-slate-800' : 'border-white/60'}`}>
+                                <h5 className={`text-xs font-semibold uppercase mb-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
+                                    {getTranslation(language, 'deviceStates')}
+                                </h5>
                                 <div className="space-y-1">
                                     {devices.map((device, idx) => (
                                         <div key={device.jid} className="flex items-center justify-between text-sm py-1">
                                             <div className="flex items-center gap-2">
-                                                <Monitor size={14} className="text-slate-400" />
-                                                <span className="text-slate-600">Device {idx + 1}</span>
+                                                <Monitor size={14} className={theme === 'dark' ? 'text-slate-500' : 'text-slate-400'} />
+                                                <span className={theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}>
+                                                    {getTranslation(language, 'device')} {idx + 1}
+                                                </span>
                                             </div>
                                             <span className={clsx(
                                                 "px-2 py-0.5 rounded text-xs font-medium",
-                                                device.state === 'OFFLINE' ? "bg-rose-100 text-rose-700" :
-                                                    device.state.includes('Online') ? "bg-emerald-100 text-emerald-700" :
-                                                        device.state === 'Standby' ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"
+                                                device.state === 'OFFLINE'
+                                                    ? theme === 'dark' ? "bg-rose-950/40 text-rose-400" : "bg-rose-100 text-rose-700"
+                                                    : device.state.includes('Online')
+                                                        ? theme === 'dark' ? "bg-emerald-950/40 text-emerald-400" : "bg-emerald-100 text-emerald-700"
+                                                        : device.state === 'Standby'
+                                                            ? theme === 'dark' ? "bg-amber-950/40 text-amber-400" : "bg-amber-100 text-amber-700"
+                                                            : "bg-slate-100 text-slate-600"
                                             )}>
                                                 {device.state}
                                             </span>
@@ -365,13 +403,23 @@ export function ContactCard({
                     {/* Metrics & Chart */}
                     <div className="md:col-span-2 space-y-6">
                         {/* Metrics Grid */}
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            <div className="bg-white/90 p-4 rounded-2xl shadow-sm border border-white/60 hover:shadow-md transition-shadow">
-                                <div className="text-sm text-slate-500 mb-1 flex items-center gap-1"><Activity size={16} /> Current RTT</div>
-                                <div className="text-2xl font-bold text-slate-900">{lastData?.rtt || '-'} <span className="text-sm font-normal text-slate-500">ms</span></div>
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div className={`p-4 rounded-2xl shadow-sm border transition-shadow hover:shadow-md ${
+                                theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-white/60'
+                            }`}>
+                                <div className={`text-sm mb-1 flex items-center gap-1 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
+                                    <Activity size={16} /> {getTranslation(language, 'currentAvgRTT')}
+                                </div>
+                                <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
+                                    {lastData?.rtt || '-'} <span className="text-sm font-normal text-slate-500">ms</span>
+                                </div>
                             </div>
-                            <div className="bg-white/90 p-4 rounded-2xl shadow-sm border border-white/60 hover:shadow-md transition-shadow">
-                                <div className="text-sm text-slate-500 mb-1 flex items-center gap-1"><BarChart2 size={16} /> Online/Standby Avg</div>
+                            <div className={`p-4 rounded-2xl shadow-sm border transition-shadow hover:shadow-md ${
+                                theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-white/60'
+                            }`}>
+                                <div className={`text-sm mb-1 flex items-center gap-1 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
+                                    <BarChart2 size={16} /> Online/Standby Avg
+                                </div>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-lg font-bold text-green-600">{lastData?.onlineAvg?.toFixed(0) || '-'}</span>
                                     <span className="text-gray-400">/</span>
@@ -379,19 +427,27 @@ export function ContactCard({
                                     <span className="text-sm text-slate-500">ms</span>
                                 </div>
                             </div>
-                            <div className="bg-white/90 p-4 rounded-2xl shadow-sm border border-white/60 hover:shadow-md transition-shadow">
-                                <div className="text-sm text-slate-500 mb-1 flex items-center gap-1"><Zap size={16} /> Threshold</div>
-                                <div className="text-2xl font-bold text-blue-600">{lastData?.threshold?.toFixed(0) || '-'} <span className="text-sm font-normal text-slate-500">ms</span></div>
-                            </div>
-                        </div>
+                            <div className={`p-4 rounded-2xl shadow-sm border transition-shadow hover:shadow-md ${
+                                theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-white/60'
+                            }`}>
+                                <div className={`text-sm mb-1 flex items-center gap-1 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
+                                    <Zap size={16} /> {getTranslation(language, 'threshold')}
+                                </div>
+                                <div className="text-2xl font-bold text-blue-600">
+                                    {lastData?.threshold?.toFixed(0) || '-'} <span className="text-sm font-normal text-slate-500">ms</span>
+                                </div>
                             </div>
                         </div>
 
                         {/* History Controls */}
-                        <div className="bg-white/80 p-3 rounded-2xl shadow-sm border border-white/60 flex flex-wrap items-center justify-between gap-3">
+                        <div className={`p-3 rounded-2xl shadow-sm border flex flex-wrap items-center justify-between gap-3 ${
+                            theme === 'dark' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-white/60'
+                        }`}>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs text-slate-500">Range</span>
-                                <div className="flex rounded-full overflow-hidden border border-white/70 bg-white/70">
+                                <div className={`flex rounded-full overflow-hidden border ${
+                                    theme === 'dark' ? 'border-slate-800 bg-slate-950/40' : 'border-white/70 bg-white/70'
+                                }`}>
                                     {rangeOptions.map((option) => {
                                         const isSelected = historyRangeMs === option.value;
                                         return (
@@ -403,7 +459,7 @@ export function ContactCard({
                                                     "px-2.5 py-1 text-xs font-medium transition-colors",
                                                     isSelected
                                                         ? "bg-[#0f766e] text-white"
-                                                        : "text-slate-600 hover:bg-white"
+                                                        : theme === 'dark' ? "text-slate-400 hover:bg-slate-800" : "text-slate-600 hover:bg-white"
                                                 )}
                                             >
                                                 {option.label}
@@ -420,8 +476,8 @@ export function ContactCard({
                                     className={clsx(
                                         "px-2.5 py-1 text-xs font-medium rounded-lg flex items-center gap-1 transition-colors",
                                         canGoBack
-                                            ? "bg-white/70 text-slate-700 hover:bg-white"
-                                            : "bg-white/60 text-slate-400 cursor-not-allowed"
+                                            ? theme === 'dark' ? "bg-slate-800/80 text-slate-300 hover:bg-slate-700" : "bg-white/70 text-slate-700 hover:bg-white"
+                                            : theme === 'dark' ? "bg-slate-900/60 text-slate-600 cursor-not-allowed" : "bg-white/60 text-slate-400 cursor-not-allowed"
                                     )}
                                 >
                                     <ChevronLeft size={14} /> Back
@@ -433,8 +489,8 @@ export function ContactCard({
                                     className={clsx(
                                         "px-2.5 py-1 text-xs font-medium rounded-lg flex items-center gap-1 transition-colors",
                                         canGoForward
-                                            ? "bg-white/70 text-slate-700 hover:bg-white"
-                                            : "bg-white/60 text-slate-400 cursor-not-allowed"
+                                            ? theme === 'dark' ? "bg-slate-800/80 text-slate-300 hover:bg-slate-700" : "bg-white/70 text-slate-700 hover:bg-white"
+                                            : theme === 'dark' ? "bg-slate-900/60 text-slate-600 cursor-not-allowed" : "bg-white/60 text-slate-400 cursor-not-allowed"
                                     )}
                                 >
                                     Forward <ChevronRight size={14} />
@@ -447,7 +503,7 @@ export function ContactCard({
                                         "px-2.5 py-1 text-xs font-medium rounded-lg transition-colors",
                                         !isLive && sortedData.length > 0
                                             ? "bg-[#0f766e] text-white hover:bg-[#0b5f58]"
-                                            : "bg-white/60 text-slate-400 cursor-not-allowed"
+                                            : theme === 'dark' ? "bg-slate-900/60 text-slate-600 cursor-not-allowed" : "bg-white/60 text-slate-400 cursor-not-allowed"
                                     )}
                                 >
                                     Now
@@ -457,7 +513,9 @@ export function ContactCard({
                         </div>
 
                         {/* Chart */}
-<div className="bg-white/90 p-6 rounded-2xl shadow-sm border border-white/60 h-[300px]">
+                        <div className={`p-6 rounded-2xl shadow-sm border h-[300px] ${
+                            theme === 'dark' ? 'bg-slate-900/90 border-slate-800' : 'bg-white/90 border-white/60'
+                        }`}>
                             <div className="flex justify-between items-center mb-4">
                                 <h5 className="text-sm font-medium text-slate-500">RTT History & Adaptive Clustering</h5>
                                 <div className="flex gap-4 text-xs text-slate-500">
@@ -469,16 +527,17 @@ export function ContactCard({
                             </div>
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={windowedData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#334155' : '#f0f0f0'} />
                                     <XAxis dataKey="timestamp" hide />
-                                    <YAxis domain={['auto', 'auto']} />
+                                    <YAxis domain={['auto', 'auto']} tick={{ fill: theme === 'dark' ? '#64748b' : '#64748b' }} />
                                     <Tooltip
                                         labelFormatter={(t: number) => new Date(t).toLocaleTimeString()}
                                         contentStyle={{
                                             borderRadius: '10px',
-                                            border: '1px solid rgba(255, 255, 255, 0.6)',
-                                            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                            boxShadow: '0 8px 20px -12px rgba(15, 23, 42, 0.35)'
+                                            border: theme === 'dark' ? '1px solid #334155' : '1px solid rgba(255, 255, 255, 0.6)',
+                                            backgroundColor: theme === 'dark' ? '#1e293b' : 'rgba(255, 255, 255, 0.95)',
+                                            boxShadow: '0 8px 20px -12px rgba(15, 23, 42, 0.35)',
+                                            color: theme === 'dark' ? '#f8fafc' : '#0f172a'
                                         }}
                                     />
                                     {/* Main RTT Line */}
@@ -487,7 +546,7 @@ export function ContactCard({
                                     {/* Threshold Line */}
                                     <Line type="step" dataKey="threshold" stroke="#ef4444" strokeDasharray="5 5" strokeWidth={2} dot={false} name="Threshold" isAnimationActive={false} />
 
-                                    {/* Cluster Centers (Visualized as faint lines or dots) */}
+                                    {/* Cluster Centers */}
                                     <Line type="monotone" dataKey="onlineAvg" stroke="#22c55e" strokeOpacity={0.5} strokeWidth={1} dot={false} name="Online Target" isAnimationActive={false} />
                                     <Line type="monotone" dataKey="standbyAvg" stroke="#eab308" strokeOpacity={0.5} strokeWidth={1} dot={false} name="Standby Target" isAnimationActive={false} />
                                 </LineChart>
@@ -495,11 +554,15 @@ export function ContactCard({
                         </div>
 
                         {/* State Timeline */}
-                        <div className="bg-white/80 rounded-2xl shadow-sm border border-white/60">
+                        <div className={`rounded-2xl shadow-sm border ${
+                            theme === 'dark' ? 'bg-slate-900/80 border-slate-800' : 'bg-white/80 border-white/60'
+                        }`}>
                             <button
                                 type="button"
                                 onClick={() => setShowStateHistory((prev) => !prev)}
-                                className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-slate-700"
+                                className={`w-full px-4 py-3 flex items-center justify-between text-sm font-medium ${
+                                    theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
+                                }`}
                             >
                                 <span>State Timeline</span>
                                 {showStateHistory ? (
@@ -509,7 +572,7 @@ export function ContactCard({
                                 )}
                             </button>
                             {showStateHistory && (
-                                <div className="border-t border-white/60 p-4">
+                                <div className={`p-4 border-t ${theme === 'dark' ? 'border-slate-800' : 'border-white/60'}`}>
                                     {stateBreakdown.length > 0 && (
                                         <div className="flex flex-wrap gap-3 text-xs text-slate-500 mb-3">
                                             {stateBreakdown.map((item) => (

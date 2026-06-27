@@ -15,7 +15,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* WhatsApp Connection */}
-<div className={`glass-panel flex flex-col items-center justify-center p-8 rounded-2xl shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)] border ${
+            <div className={`glass-panel flex flex-col items-center justify-center p-8 rounded-2xl shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)] border ${
                 theme === 'dark'
                     ? 'bg-slate-900/90 border-slate-800'
                     : 'bg-white/90 border-white/60'
@@ -27,7 +27,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
                     )}
                 </div>
                 {connectionState.whatsapp ? (
-<div className={`w-64 h-64 flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 rounded-2xl ${
+                    <div className={`w-64 h-64 flex flex-col items-center justify-center text-emerald-600 dark:text-emerald-400 rounded-2xl ${
                         theme === 'dark' ? 'bg-emerald-950/40' : 'bg-emerald-50'
                     }`}>
                         <CheckCircle size={64} className="mb-4" />
@@ -35,7 +35,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
                     </div>
                 ) : (
                     <>
-<div className={`p-4 rounded-2xl mb-6 border ${
+                        <div className={`p-4 rounded-2xl mb-6 border ${
                             theme === 'dark'
                                 ? 'bg-slate-800/80 border-slate-700'
                                 : 'bg-white/70 border-white/60'
@@ -60,7 +60,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
             </div>
 
             {/* Signal Connection */}
-<div className={`glass-panel flex flex-col items-center justify-center p-8 rounded-2xl shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)] border ${
+            <div className={`glass-panel flex flex-col items-center justify-center p-8 rounded-2xl shadow-[0_24px_60px_-40px_rgba(15,23,42,0.35)] border ${
                 theme === 'dark'
                     ? 'bg-slate-900/90 border-slate-800'
                     : 'bg-white/90 border-white/60'
@@ -72,7 +72,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
                     )}
                 </div>
                 {connectionState.signal ? (
-<div className={`w-64 h-64 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 rounded-2xl ${
+                    <div className={`w-64 h-64 flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 rounded-2xl ${
                         theme === 'dark' ? 'bg-blue-950/40' : 'bg-blue-50'
                     }`}>
                         <CheckCircle size={64} className="mb-4" />
@@ -83,7 +83,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
                     </div>
                 ) : connectionState.signalApiAvailable ? (
                     <>
-<div className={`p-4 rounded-2xl mb-6 border ${
+                        <div className={`p-4 rounded-2xl mb-6 border ${
                             theme === 'dark'
                                 ? 'bg-slate-800/80 border-slate-700'
                                 : 'bg-white/70 border-white/60'
@@ -94,7 +94,7 @@ export function Login({ connectionState, language, theme }: LoginProps) {
                                     alt="Signal QR Code"
                                     width={256}
                                     height={256}
-className={`rounded-xl ${theme === 'dark' ? 'bg-slate-900' : 'bg-white'}`}
+                                    className={`rounded-xl ${theme === 'dark' ? 'bg-slate-900' : 'bg-white'}`}
                                 />
                             ) : (
                                 <div className={`w-64 h-64 flex items-center justify-center ${

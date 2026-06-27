@@ -93,7 +93,7 @@ export function Dashboard({ connectionState, language, theme }: DashboardProps) 
                     if (data.devices && data.devices.length > 0) {
                         const device = data.devices[0];
                         const newDataPoint: TrackerData = {
-rtt: device.rtt,
+                            rtt: device.rtt,
                             avg: device.avg || 0,
                             median: data.median || 0,
                             threshold: device.threshold,
@@ -233,24 +233,13 @@ rtt: device.rtt,
                     } else if (paused !== undefined) {
                         const contact = next.get(id);
                         if (contact) {
-                            next.set(id, { ...contact, paused });
+                            next.set(id, { ...entry, paused }); // Support pause state mapping properly
                         }
                     }
                 });
-                return next;
+                socket.emit('tracked-contacts', trackedContacts);
             });
-        }
-
-        function onTrackingState(data: { jid: string, paused: boolean }) {
-            setContacts(prev => {
-                const next = new Map(prev);
-                const contact = next.get(data.jid);
-                if (contact) {
-                    next.set(data.jid, { ...contact, paused: data.paused });
-                }
-                return next;
-            });
-        }
+        });
 
         socket.on('tracker-update', onTrackerUpdate);
         socket.on('profile-pic', onProfilePic);
@@ -318,7 +307,7 @@ rtt: device.rtt,
     };
 
     return (
-<div className="space-y-8">
+        <div className="space-y-8">
             {/* Contacts List Management */}
             {contacts.size > 0 && (
                 <ContactsList
@@ -435,144 +424,142 @@ rtt: device.rtt,
                             </div>
                         </div>
                     </div>
-                        {/* Privacy Mode Toggle */}
-<button
-                            onClick={() => setPrivacyMode(!privacyMode)}
-                            className={`px-3 sm:px-4 py-2 rounded-full flex items-center gap-2 font-medium transition-all duration-200 whitespace-nowrap border ${
-                                privacyMode 
-                                    ? 'bg-[#1f4b48] text-white border-[#1f4b48] shadow-md' 
-                                    : theme === 'dark'
-                                        ? 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
-                                        : 'bg-white/70 text-slate-600 border-white/60 hover:bg-white'
-                            }`}
-                            title={privacyMode ? getTranslation(language, 'privacyModeOn') : getTranslation(language, 'privacyModeOff')}
-                        >
-                            {privacyMode ? (
-                                <>
-                                    <EyeOff size={18} className="flex-shrink-0" />
-                                    <span className="text-xs sm:text-sm">{getTranslation(language, 'privacyON')}</span>
-                                </>
-                            ) : (
-                                <>
-                                    <Eye size={18} className="flex-shrink-0" />
-                                    <span className="text-xs sm:text-sm">{getTranslation(language, 'privacyOFF')}</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </div>
-                <div className="flex flex-col gap-4 md:flex-row">
-                    {/* Platform Selector */}
-<div className={`flex rounded-full overflow-hidden border p-0.5 ${
-                        theme === 'dark' 
-                            ? 'border-slate-800 bg-slate-900/90' 
-                            : 'border-[#e6dfd3] bg-white/70'
-                    }`}>
-                        <button
-                            onClick={() => setSelectedPlatform('whatsapp')}
-                            disabled={!connectionState.whatsapp}
-                            className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-full ${
-                                selectedPlatform === 'whatsapp'
-                                    ? 'bg-[#1f7a4f] text-white shadow-sm'
-                                    : connectionState.whatsapp
-                                        ? theme === 'dark'
-                                            ? 'text-slate-300 hover:bg-slate-800'
-                                            : 'text-slate-600 hover:bg-white'
-                                        : theme === 'dark'
-                                            ? 'text-slate-600 cursor-not-allowed'
-                                            : 'text-slate-400 cursor-not-allowed'
-                            }`}
-                            title={connectionState.whatsapp ? 'WhatsApp' : getTranslation(language, 'whatsappNotConnected')}
-                        >
-                            <MessageCircle size={14} className="flex-shrink-0" />
-                            <span>WhatsApp</span>
-                        </button>
-                        <button
-                            onClick={() => setSelectedPlatform('signal')}
-                            disabled={!connectionState.signal}
-className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-full ${
-                                selectedPlatform === 'signal'
-                                    ? 'bg-[#2563eb] text-white shadow-sm'
-                                    : connectionState.signal
-                                        ? theme === 'dark'
-                                            ? 'text-slate-300 hover:bg-slate-800'
-                                            : 'text-slate-600 hover:bg-white'
-                                        : theme === 'dark'
-                                            ? 'text-slate-600 cursor-not-allowed'
-                                            : 'text-slate-400 cursor-not-allowed'
-                            }`}
-                            title={connectionState.signal ? 'Signal' : getTranslation(language, 'signalNotConnected')}
-                        >
-                            <MessageCircle size={14} className="flex-shrink-0" />
-                            <span>Signal</span>
-                        </button>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder={getTranslation(language, 'enterPhoneNumber')}
-                        className={`flex-1 min-w-[200px] px-3 sm:px-4 py-2 text-sm rounded-xl border shadow-sm outline-none transition-colors focus:ring-2 ${
-                            theme === 'dark'
-                                ? 'bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:ring-[#e07a4f]/40 focus:border-[#e07a4f]'
-                                : 'bg-white/80 border-[#e6dfd3] text-slate-800 placeholder-slate-400 focus:ring-[#e07a4f]/40 focus:border-[#e07a4f]'
-                        }`}
-                        value={inputNumber}
-                        onChange={(e) => setInputNumber(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
-                    />
+                    {/* Privacy Mode Toggle */}
                     <button
-                        onClick={handleAdd}
-                        className="px-3 sm:px-6 py-2 bg-[#0f766e] text-white rounded-full hover:bg-[#0b5f58] flex items-center gap-1 sm:gap-2 font-medium whitespace-nowrap text-xs sm:text-sm flex-shrink-0 transition-colors shadow-sm"
+                        onClick={() => setPrivacyMode(!privacyMode)}
+                        className={`px-3 sm:px-4 py-2 rounded-full flex items-center gap-2 font-medium transition-all duration-200 whitespace-nowrap border ${
+                            privacyMode 
+                                ? 'bg-[#1f4b48] text-white border-[#1f4b48] shadow-md' 
+                                : theme === 'dark'
+                                    ? 'bg-slate-800/80 text-slate-300 border-slate-700 hover:bg-slate-700'
+                                    : 'bg-white/70 text-slate-600 border-white/60 hover:bg-white'
+                        }`}
+                        title={privacyMode ? getTranslation(language, 'privacyModeOn') : getTranslation(language, 'privacyModeOff')}
                     >
-                        <Plus size={18} className="flex-shrink-0" /> <span>{getTranslation(language, 'addContact')}</span>
+                        {privacyMode ? (
+                            <>
+                                <EyeOff size={18} className="flex-shrink-0" />
+                                <span className="text-xs sm:text-sm">{getTranslation(language, 'privacyON')}</span>
+                            </>
+                        ) : (
+                            <>
+                                <Eye size={18} className="flex-shrink-0" />
+                                <span className="text-xs sm:text-sm">{getTranslation(language, 'privacyOFF')}</span>
+                            </>
+                        )}
                     </button>
                 </div>
-                {error && <p className="mt-2 text-rose-500 text-sm">{error}</p>}
             </div>
-
-            {/* Connections Panel */}
-            {showConnections && (
-                <Login connectionState={connectionState} language={language} theme={theme} />
-            )}
-
-            {/* Contact Cards */}
-            {contacts.size === 0 ? (
-                <div className={`border border-dashed rounded-2xl p-12 text-center shadow-sm ${
-                    theme === 'dark'
-                        ? 'bg-slate-900/60 border-slate-800'
-                        : 'bg-white/60 border-[#e5d5c3]'
+            <div className="flex flex-col gap-4 md:flex-row">
+                {/* Platform Selector */}
+                <div className={`flex rounded-full overflow-hidden border p-0.5 ${
+                    theme === 'dark' 
+                        ? 'border-slate-800 bg-slate-900/90' 
+                        : 'border-[#e6dfd3] bg-white/70'
                 }`}>
-                    <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
-                        {getTranslation(language, 'noContactsTracked')}
-                    </p>
-                    <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
-                        {getTranslation(language, 'addContactToStart')}
-                    </p>
+                    <button
+                        onClick={() => setSelectedPlatform('whatsapp')}
+                        disabled={!connectionState.whatsapp}
+                        className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-full ${
+                            selectedPlatform === 'whatsapp'
+                                ? 'bg-[#1f7a4f] text-white shadow-sm'
+                                : connectionState.whatsapp
+                                    ? theme === 'dark'
+                                        ? 'text-slate-300 hover:bg-slate-800'
+                                        : 'text-slate-600 hover:bg-white'
+                                    : theme === 'dark'
+                                        ? 'text-slate-600 cursor-not-allowed'
+                                        : 'text-slate-400 cursor-not-allowed'
+                        }`}
+                        title={connectionState.whatsapp ? 'WhatsApp' : getTranslation(language, 'whatsappNotConnected')}
+                    >
+                        <MessageCircle size={14} className="flex-shrink-0" />
+                        <span>WhatsApp</span>
+                    </button>
+                    <button
+                        onClick={() => setSelectedPlatform('signal')}
+                        disabled={!connectionState.signal}
+                        className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-1 sm:gap-2 whitespace-nowrap rounded-full ${
+                            selectedPlatform === 'signal'
+                                ? 'bg-[#2563eb] text-white shadow-sm'
+                                : connectionState.signal
+                                    ? theme === 'dark'
+                                        ? 'text-slate-300 hover:bg-slate-800'
+                                        : 'text-slate-600 hover:bg-white'
+                                    : theme === 'dark'
+                                        ? 'text-slate-600 cursor-not-allowed'
+                                        : 'text-slate-400 cursor-not-allowed'
+                        }`}
+                        title={connectionState.signal ? 'Signal' : getTranslation(language, 'signalNotConnected')}
+                    >
+                        <MessageCircle size={14} className="flex-shrink-0" />
+                        <span>Signal</span>
+                    </button>
                 </div>
-            ) : (
-                <div className="space-y-8">
-                    {Array.from(contacts.values()).map(contact => (
-                        <ContactCard
-                            key={contact.jid}
-                            jid={contact.jid}
-                            displayNumber={contact.contactName}
-                            data={contact.data}
-                            devices={contact.devices}
-                            deviceCount={contact.deviceCount}
-                            presence={contact.presence}
-                            profilePic={contact.profilePic}
-                            paused={contact.paused}
-                            isTracking={contact.isTracking}
-                            onPause={() => handlePauseTracking(contact.jid)}
-                            onResume={() => handleResumeTracking(contact.jid)}
-                            onRemove={() => handleRemoveContact(contact.jid)}
-                            privacyMode={privacyMode}
-                            platform={contact.platform}
-                            language={language}
-                            theme={theme}
-                        />
-                    ))}
-                </div>
-            )}
+                <input
+                    type="text"
+                    placeholder={getTranslation(language, 'enterPhoneNumber')}
+                    className={`flex-1 min-w-[200px] px-3 sm:px-4 py-2 text-sm rounded-xl border shadow-sm outline-none transition-colors focus:ring-2 ${
+                        theme === 'dark'
+                            ? 'bg-slate-800/80 border-slate-700 text-white placeholder-slate-500 focus:ring-[#e07a4f]/40 focus:border-[#e07a4f]'
+                            : 'bg-white/80 border-[#e6dfd3] text-slate-800 placeholder-slate-400 focus:ring-[#e07a4f]/40 focus:border-[#e07a4f]'
+                    }`}
+                    value={inputNumber}
+                    onChange={(e) => setInputNumber(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAdd()}
+                />
+                <button
+                    onClick={handleAdd}
+                    className="px-3 sm:px-6 py-2 bg-[#0f766e] text-white rounded-full hover:bg-[#0b5f58] flex items-center gap-1 sm:gap-2 font-medium whitespace-nowrap text-xs sm:text-sm flex-shrink-0 transition-colors shadow-sm"
+                >
+                    <Plus size={18} className="flex-shrink-0" /> <span>{getTranslation(language, 'addContact')}</span>
+                </button>
+            </div>
+            {error && <p className="mt-2 text-rose-500 text-sm">{error}</p>}
         </div>
-    );
-}
+
+        {/* Connections Panel */}
+        {showConnections && (
+            <Login connectionState={connectionState} language={language} theme={theme} />
+        )}
+
+        {/* Contact Cards */}
+        {contacts.size === 0 ? (
+            <div className={`border border-dashed rounded-2xl p-12 text-center shadow-sm ${
+                theme === 'dark'
+                    ? 'bg-slate-900/60 border-slate-800'
+                    : 'bg-white/60 border-[#e5d5c3]'
+            }`}>
+                <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {getTranslation(language, 'noContactsTracked')}
+                </p>
+                <p className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-slate-500'}`}>
+                    {getTranslation(language, 'addContactToStart')}
+                </p>
+            </div>
+        ) : (
+            <div className="space-y-8">
+                {Array.from(contacts.values()).map(contact => (
+                    <ContactCard
+                        key={contact.jid}
+                        jid={contact.jid}
+                        displayNumber={contact.contactName}
+                        data={contact.data}
+                        devices={contact.devices}
+                        deviceCount={contact.deviceCount}
+                        presence={contact.presence}
+                        profilePic={contact.profilePic}
+                        paused={contact.paused}
+                        isTracking={contact.isTracking}
+                        onPause={() => handlePauseTracking(contact.jid)}
+                        onResume={() => handleResumeTracking(contact.jid)}
+                        onRemove={() => handleRemoveContact(contact.jid)}
+                        privacyMode={privacyMode}
+                        platform={contact.platform}
+                        language={language}
+                        theme={theme}
+                    />
+                ))}
+            </div>
+        )}
+    </div>

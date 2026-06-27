@@ -61,7 +61,7 @@ class TrackerLogger {
 const logger = new TrackerLogger(true);
 
 export class SignalTracker {
-private apiUrl: string;
+    private apiUrl: string;
     private senderNumber: string;
     private targetNumber: string;
     private isTracking: boolean = false;
