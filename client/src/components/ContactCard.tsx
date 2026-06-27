@@ -281,14 +281,18 @@ export function ContactCard({
                                         tick={{ fill: theme === 'dark' ? '#9ca3af' : '#000', fontSize: 12 }}
                                     />
                                     <Tooltip
-                                        labelFormatter={(t: number) => new Date(t).toLocaleTimeString()}
-                                        contentStyle={{
-                                            borderRadius: '8px',
-                                            border: 'none',
-                                            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                                            backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
-                                            color: theme === 'dark' ? '#f3f4f6' : '#000000'
-                                        }}
+labelFormatter={(label) => {
+                                        const t = typeof label === "number" ? label : Number(label);
+                                        if (!Number.isFinite(t)) return String(label ?? "");
+                                        return new Date(t).toLocaleTimeString();
+                                      }}
+                                      contentStyle={{
+                                        borderRadius: "8px",
+                                        border: "none",
+                                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                                        backgroundColor: theme === 'dark' ? '#1f2937' : '#ffffff',
+                                        color: theme === 'dark' ? '#f3f4f6' : '#000000'
+                                      }}
                                     />
                                     <Line type="monotone" dataKey="avg" stroke="#3b82f6" strokeWidth={2} dot={false} name={getTranslation(language, 'currentAvgRTT')} isAnimationActive={false} />
                                     <Line type="step" dataKey="threshold" stroke="#ef4444" strokeDasharray="5 5" dot={false} name={getTranslation(language, 'threshold')} isAnimationActive={false} />
